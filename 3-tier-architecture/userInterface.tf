@@ -23,12 +23,6 @@ resource "aws_internet_gateway" "website1IG" {
   }
 }
 
-resource "aws_lb" "websiteLB" {
-  name = "website1-loadbalancer"
-  load_balancer_type = "application"
-  subnets = "${aws_subnet.website1Subnet.*.id}"
-}
-
 resource "aws_instance" "website1"{
   ami = "ami-067d1e60475437da2"
   instance_type = "t2.micro"
