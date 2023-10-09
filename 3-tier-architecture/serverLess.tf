@@ -1,17 +1,7 @@
-resource "aws_s3_bucket" "websiteStorage" {
-  bucket = "website-1-bucket"
-}
-
-resource "aws_s3_object" "storage" {
-  bucket = "${aws_s3_bucket.websiteStorage.bucket}"
-  key    = "codeBase.zip"
-  source = "website/"
-}
-
 resource "aws_lambda_function" "CRUDAPI" {
   function_name = "crudOperationsPreformer"
-  s3_bucket = "${aws_s3_bucket.websiteStorage.bucket}"
-  s3_key    = "${aws_s3_object.storage.source}/${aws_s3_object.storage.key}"
+  s3_bucket = "website-1-bucket"
+  s3_key    = "codeBase/codeBase.zip"
   handler = "main.handler"
   runtime = "nodejs16.x"
 
@@ -84,14 +74,14 @@ resource "aws_api_gateway_integration" "lambda_root" {
   uri  = "${aws_lambda_function.CRUDAPI.invoke_arn}"
 }
 
-resource "aws_api_gateway_deployment" "websiteGateway" {
-  rest_api_id = "${aws_api_gateway_rest_api.gateway.id}"
-}
+resource "aws_api_gateway_deployment" "gateway" {
+  depends_on = [
+    "aws_api_gateway_integration.lambda",
+    "aws_api_gateway_integration.lambda_root",
+  ]
 
-resource "aws_api_gateway_stage" "websiteGateway" {
-  deployment_id = aws_api_gateway_deployment.websiteGateway.id
-  rest_api_id   = aws_api_gateway_rest_api.gateway.id
-  stage_name    = "websiteGateway"
+  rest_api_id = "${aws_api_gateway_rest_api.gateway.id}"
+  stage_name  = "test"
 }
 
 resource "aws_lambda_permission" "apigw" {
